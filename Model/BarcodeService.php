@@ -24,12 +24,15 @@ class BarcodeService{
         $this->webroot = $webroot;    
         $this->logger = $logger;
     }
-    public function saveAs($type, $text, $file){
+    public function saveAs($type, $text, $file, $options){
         @unlink($file);
         switch ($type){
             case $type == 'qr':
-                include_once __DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."Resources".DIRECTORY_SEPARATOR."phpqrcode".DIRECTORY_SEPARATOR."qrlib.php";
-                \QRcode::png($text, $file);
+                $ecc = array_key_exists('ECC', $options) ? $options['ECC'] : null;
+                $size = array_key_exists('size', $options) ? $options['size'] : null;
+                $margin = array_key_exists('margin', $options) ? $options['margin'] : null;
+                include __DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."Resources".DIRECTORY_SEPARATOR."phpqrcode".DIRECTORY_SEPARATOR."qrlib.php";
+                \QRcode::png($text, $file, $ecc, $size, $margin);
             break;
             case is_numeric($type):
                 $type = $this->types[$type];
@@ -58,7 +61,7 @@ class BarcodeService{
         $text = urldecode($enctext);
         $filename = $this->getAbsoluteBarcodeDir($type).$this->getBarcodeFilename($text);
         if(!file_exists($filename)){
-            $this->saveAs($type, $text, $filename);
+            $this->saveAs($type, $text, $filename, $options);
         }
         if(!$absolut){
             $path = DIRECTORY_SEPARATOR.$this->webdir.$this->getTypeDir($type).$this->getBarcodeFilename($text);
